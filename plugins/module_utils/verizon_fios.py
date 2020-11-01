@@ -1,3 +1,6 @@
+# Copyright: nbr23
+# License: MIT
+
 import urllib3
 import requests
 from json import JSONDecodeError
@@ -80,8 +83,6 @@ class RouterSession:
                     })
 
     def get_settings_dns_hostname(self, hostname):
-        import q
         for entry in self.get_settings_dns_entries():
-            q(entry)
             if entry['hostname'] == hostname:
                 return entry
