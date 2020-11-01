@@ -72,6 +72,10 @@ RETURN = '''
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.nbr23.fiosrouter.plugins.module_utils.verizon_fios import RouterSession
 
+def module_fail(module, session, msg):
+    session.logout()
+    module.fail_json(msg=msg)
+
 def main():
     module = AnsibleModule(
         argument_spec=dict(
