@@ -84,7 +84,7 @@ def main():
             router_port=dict(type='int', default=443),
             state=dict(default='present', choices=['present', 'absent']),
             name=dict(required=True, type='str'),
-            ip=dict(required=True, type='str')
+            ip=dict(required=False, type='str')
         ),
         supports_check_mode=True
     )
@@ -104,16 +104,22 @@ def main():
             module.fail_json(msg='API Login error: Incorrect fios credentials')
 
     current = session.get_settings_dns_hostname(module.params['name'])
+    ipparam = module.params.get('ip')
 
     if current is not None:
-        if present and module.params['ip'] != current['ipAddress']:
-            session.put_settings_dns(current['id'], module.params['name'], module.params['ip'])
-            result['changed'] = True
-        elif not present:
-            session.del_settings_dns(current['id'])
+        if not present:
+            if ipparam is None or ipparam == current['ipAddress']:
+                session.del_settings_dns(current['id'])
+                result['changed'] = True
+        elif ipparam is None:
+            module_fail(module, session, '`ip` parameter required with state `present`')
+        elif ipparam != current['ipAddress']:
+            session.put_settings_dns(current['id'], module.params['name'], ipparam)
             result['changed'] = True
     else:
         if present:
+            if ipparam is None:
+                module_fail(module, session, '`ip` parameter required with state `present`')
             session.post_settings_dns_entry(module.params['name'], module.params['ip'])
             result['changed'] = True
 
