@@ -109,18 +109,21 @@ def main():
     if current is not None:
         if not present:
             if ipparam is None or ipparam == current['ipAddress']:
-                session.del_settings_dns(current['id'])
+                if not module.check_mode:
+                    session.del_settings_dns(current['id'])
                 result['changed'] = True
         elif ipparam is None:
             module_fail(module, session, '`ip` parameter required with state `present`')
         elif ipparam != current['ipAddress']:
-            session.put_settings_dns(current['id'], module.params['name'], ipparam)
+            if not module.check_mode:
+                session.put_settings_dns(current['id'], module.params['name'], ipparam)
             result['changed'] = True
     else:
         if present:
             if ipparam is None:
                 module_fail(module, session, '`ip` parameter required with state `present`')
-            session.post_settings_dns_entry(module.params['name'], module.params['ip'])
+            if not module.check_mode:
+                session.post_settings_dns_entry(module.params['name'], module.params['ip'])
             result['changed'] = True
 
     session.logout()
