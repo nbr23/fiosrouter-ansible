@@ -95,7 +95,13 @@ def main():
 
     present = module.params['state'] == 'present'
     session = RouterSession(module.params['router_ip'], module.params['router_port'])
-    session.login(module.params['router_password'])
+
+    log_res = session.login(module.params['router_password'])
+    if log_res is not None and 'error' in log_res:
+        if log_res.get('error') == 2:
+            module.fail_json(msg='API Login error: too many sessions open')
+        else:
+            module.fail_json(msg='API Login error: Incorrect fios credentials')
 
     current = session.get_settings_dns_hostname(module.params['name'])
 
