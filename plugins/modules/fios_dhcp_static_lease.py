@@ -77,7 +77,6 @@ RETURN = '''
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.nbr23.fiosrouter.plugins.module_utils.verizon_fios import RouterSession
-import q
 
 def module_fail(module, session, msg):
     session.logout()
@@ -112,8 +111,6 @@ def main():
             module.fail_json(msg='API Login error: Incorrect fios credentials')
 
     current = session.get_dhcp_client(module.params['name'], module.params['ip'], module.params['mac'])
-    q(current)
-
     if len(current) > 1:
          module_fail(module, session, 'Conflicting entries found for specified ip, mac, name')
 
@@ -121,7 +118,7 @@ def main():
 
     if current is not None:
         if not present and current['staticIp']:
-            q(session.del_dhcp_client(current['id']))
+            session.del_dhcp_client(current['id'])
             result['changed'] = True
         elif present and not current['staticIp'] \
                 and current['name'] == module.params['name'] \
