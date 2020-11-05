@@ -86,3 +86,24 @@ class RouterSession:
         for entry in self.get_settings_dns_entries():
             if entry['hostname'] == hostname:
                 return entry
+
+    def get_dhcp_clients(self):
+        return self.get('dhcp/clients')
+
+    def get_dhcp_client(self, hostname, ipAddress, mac):
+        return [client for client in self.get_dhcp_clients()
+                if client['ipAddress'] == ipAddress or
+                    client['mac'] == mac or
+                    client['name'] == hostname]
+
+    def post_dhcp_client(self, hostname, ipAddress, mac, staticAddress):
+        return self.post('dhcp/clients',
+                {
+                    'name': hostname,
+                    'ipAddress': ipAddress,
+                    'mac': mac,
+                    'staticAddress': staticAddress,
+                    })
+
+    def del_dhcp_client(self, entry_id):
+        return self.delete('dhcp/clients/{}'.format(entry_id))
