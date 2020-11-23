@@ -119,3 +119,9 @@ class RouterSession:
 
     def del_dhcp_client(self, entry_id):
         return self.delete('dhcp/clients/{}'.format(entry_id))
+
+    def get_port_forwardings(self):
+        return self.get('firewall/portforward')
+
+    def del_port_forwarding(self, entry_id):
+        return self.delete('firewall/portforward/{}'.format(entry_id))
