@@ -11,6 +11,18 @@ urllib3.disable_warnings()
 def hash_password(password, salt):
     return sha512(str(password + salt).encode()).hexdigest()
 
+
+def protocol_match(pname, pid):
+    return pname == 'both' or (pname == 'tcp' and pid == 1) or \
+            (pname == 'udp' and pid == 2)
+
+def protocol_ids(protocol_name):
+    if protocol_name == 'both':
+        return [1, 2]
+    elif protocol_name == 'tcp':
+        return [1]
+    return [2]
+
 class RouterSession:
     def __init__(self, ip, port):
         self.ip = ip
