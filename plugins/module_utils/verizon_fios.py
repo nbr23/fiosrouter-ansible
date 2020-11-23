@@ -16,6 +16,15 @@ def protocol_match(pname, pid):
     return pname == 'both' or (pname == 'tcp' and pid == 1) or \
             (pname == 'udp' and pid == 2)
 
+def get_rule_protocols(rule):
+    return [p['protocol'] for p in rule['protocols']]
+
+def port_in_forward_rule(rule, port):
+    for p in rule['protocols']:
+        if p['outgoingPortStart'] != port:
+            return False
+    return True
+
 def protocol_ids(protocol_name):
     if protocol_name == 'both':
         return [1, 2]
