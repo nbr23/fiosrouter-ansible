@@ -132,5 +132,48 @@ class RouterSession:
     def get_port_forwardings(self):
         return self.get('firewall/portforward')
 
+    def get_matching_port_forwarding(self, name, ip, port_ext, port_int, protocol):
+        return [pf for pf in self.get_port_forwardings()
+            if pf['name'] == name \
+                or (pf['deviceIp'] == ip and pf['servicePort'] == port_int) \
+                or len([prot for prot in pf['protocols']
+                    if protocol_match(protocol, prot['protocol']) \
+                            and port_ext == prot['outgoingPortStart']]) > 0
+                ]
+
+    def is_equal_port_forwarding(self, rule, name, ip, port_ext, port_int, protocol):
+        return rule['name'] == name and \
+                rule['deviceIp'] == ip and \
+                rule['servicePort'] == port_ext and \
+                port_in_forward_rule(rule, port_ext) and \
+                sum(get_rule_protocols(rule)) == sum(protocol_ids(protocol))
+
+    def post_port_forwarding(self, name, ip, port_ext, port_int, protocol, enabled, port_src=None):
+        return self.post('firewall/portforward',
+                {
+                    "enabled": enabled,
+                    "deviceIp": ip,
+                    "name": name,
+                    "protocols": [
+                        {
+                            "protocol": proto,
+                            "incomingPorts": 0 if port_src is None else 1,
+                            "incomingPortStart": 0 if port_src is None else port_src,
+                            "incomingPortEnd": 65535 if port_src is None else port_src,
+                            "incomingExclude": False,
+                            "outgoingPorts": 1,
+                            "outgoingPortStart": port_ext,
+                            "outgoingPortEnd": port_ext,
+                            "outgoingExclude": False
+                            } for proto in protocol_ids(protocol)
+                        ],
+                    "schedule": "Always",
+                    "servicePort": port_int
+                    })
+
+    def put_port_forwarding(self, rule_id, enabled):
+        return self.put('firewall/portforward/{}'.format(rule_id),
+                { "enabled": enabled, })
+
     def del_port_forwarding(self, entry_id):
         return self.delete('firewall/portforward/{}'.format(entry_id))
