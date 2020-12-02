@@ -145,7 +145,8 @@ def main():
                         module.params['port_int'],
                         module.params['protocol']
                         ):
-                    session.del_port_forwarding(rule['id'])
+                    if not module.check_mode:
+                        session.del_port_forwarding(rule['id'])
                     result['changed'] = True
         else:
             if len(current) == 1:
@@ -157,29 +158,32 @@ def main():
                         module.params['protocol']
                         ):
                     if current[0]['enabled'] != module.params['enabled']:
-                        session.put_port_forwarding(current[0]['id'],
-                                module.params['enabled'])
+                        if not module.check_mode:
+                            session.put_port_forwarding(current[0]['id'],
+                                    module.params['enabled'])
                         result['changed'] = True
                 else:
-                    session.del_port_forwarding(current[0]['id'])
-                    session.post_port_forwarding(module.params['name'],
-                            module.params['ip'],
-                            module.params['port_ext'],
-                            module.params['port_int'],
-                            module.params['protocol'],
-                            module.params['enabled']
-                            )
+                    if not module.check_mode:
+                        session.del_port_forwarding(current[0]['id'])
+                        session.post_port_forwarding(module.params['name'],
+                                module.params['ip'],
+                                module.params['port_ext'],
+                                module.params['port_int'],
+                                module.params['protocol'],
+                                module.params['enabled']
+                                )
                     result['changed'] = True
             else:
                 module_fail(module, session, msg='Ambiguous situation: several existing rules match the description.\n{}'.format(current))
     elif present:
-        session.post_port_forwarding(module.params['name'],
-                module.params['ip'],
-                module.params['port_ext'],
-                module.params['port_int'],
-                module.params['protocol'],
-                module.params['enabled']
-                )
+        if not module.check_mode:
+            session.post_port_forwarding(module.params['name'],
+                    module.params['ip'],
+                    module.params['port_ext'],
+                    module.params['port_int'],
+                    module.params['protocol'],
+                    module.params['enabled']
+                    )
         result['changed'] = True
 
     session.logout()
