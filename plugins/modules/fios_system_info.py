@@ -40,6 +40,8 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
+- firmware_info: Firmware version and information
+- system_info: System and hardware information
 '''
 
 from ansible.module_utils.basic import AnsibleModule
