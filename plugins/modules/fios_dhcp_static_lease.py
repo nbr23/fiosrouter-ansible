@@ -119,25 +119,25 @@ def main():
     if current is not None:
         if not present and current['staticIp']:
             if not module.check_mode:
-                session.del_dhcp_client(current['id'])
+                result['result'] = session.del_dhcp_client(current['id'])
             result['changed'] = True
         elif present and not current['staticIp'] \
                 and current['name'] == module.params['name'] \
                 and current['ipAddress'] == module.params['ip'] \
                 and current['mac'] == module.params['mac']:
             if not module.check_mode:
-                session.post_dhcp_client(current['name'], current['ipAddress'], current['mac'], True)
+                result['result'] = session.post_dhcp_client(current['name'], current['ipAddress'], current['mac'], True)
             result['changed'] = True
         elif present and (current['name'] != module.params['name']
                 or current['ipAddress'] != module.params['ip']
                 or current['mac'] != module.params['mac']):
             if not module.check_mode:
                 session.del_dhcp_client(current['id'])
-                session.post_dhcp_client(module.params['name'], module.params['ip'], module.params['mac'], True)
+                result['result'] = session.post_dhcp_client(module.params['name'], module.params['ip'], module.params['mac'], True)
             result['changed'] = True
     elif present:
         if not module.check_mode:
-            session.post_dhcp_client(module.params['name'], module.params['ip'], module.params['mac'], True)
+            result['result'] = session.post_dhcp_client(module.params['name'], module.params['ip'], module.params['mac'], True)
         result['changed'] = True
 
     session.logout()
